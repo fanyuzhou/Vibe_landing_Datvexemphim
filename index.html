@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ngọc Châu Cinema — Rạp chiếu phim đẳng cấp thế giới</title>
+  
+  <!-- CSS files -->
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/customer.css">
+
+  <!-- SQL.js WebAssembly SQLite CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <header class="navbar">
+    <div class="container">
+      <a href="index.html" class="brand">
+        <img src="logo/logo.jpg" alt="Ngọc Châu Cinema Logo" class="brand-logo">
+        <div class="brand-text">
+          <span class="brand-title">NGỌC CHÂU</span>
+          <span class="brand-subtitle">CINEMA</span>
+        </div>
+      </a>
+
+      <nav class="nav-links" id="nav-links">
+        <a href="index.html" class="nav-link active">Trang Chủ</a>
+        <a href="#movies" class="nav-link">Phim Đang Chiếu</a>
+        <a href="#cinemas" class="nav-link">Cụm Rạp</a>
+        <a href="booking.html" class="nav-link">Đặt Vé</a>
+        <a href="admin-login.html" class="nav-link" style="color: var(--primary-gold);">Quản Trị Viên</a>
+      </nav>
+
+      <div class="nav-actions">
+        <a href="booking.html" class="btn btn-primary btn-sm">🎟️ Đặt Vé Ngay</a>
+        <button class="mobile-menu-btn" id="mobile-menu-btn">☰</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-overlay"></div>
+    <div class="container">
+      <div class="hero-content">
+        <div class="hero-tag">✨ Rạp Chiếu Phim Đẳng Cấp Thượng Lưu</div>
+        <h1 class="hero-title">Trải Nghiệm Điện Ảnh <span>Ngọc Châu Cinema</span></h1>
+        <p class="hero-desc">Tận hưởng âm thanh Dolby Atmos đỉnh cao, màn hình IMAX sắc nét cùng hệ thống ghế xem phim cao cấp. Đặt vé xem phim chiếu rạp nhanh chóng chỉ với vài thao tác đơn giản.</p>
+        <div class="hero-actions">
+          <a href="booking.html" class="btn btn-primary btn-lg">🎟️ Đặt Vé Ngay</a>
+          <a href="#movies" class="btn btn-secondary btn-lg">🎬 Xem Danh Sách Phim</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Movie Section -->
+  <section class="section-movies container" id="movies" style="padding-top: 3rem; padding-bottom: 3rem;">
+    <div class="section-header">
+      <h2 class="section-title">Phim Chiếu Rạp</h2>
+
+      <div class="movie-filters">
+        <div class="filter-tabs">
+          <button class="filter-tab active" data-status="now_showing">🔥 Đang Chiếu</button>
+          <button class="filter-tab" data-status="coming_soon">⏳ Sắp Chiếu</button>
+        </div>
+
+        <div class="search-box">
+          <span class="search-box-icon">🔍</span>
+          <input type="text" id="search-movie-input" class="form-control" placeholder="Tìm tên phim, thể loại...">
+        </div>
+      </div>
+    </div>
+
+    <!-- Dynamic Movie Cards Grid -->
+    <div class="movie-grid" id="movie-grid">
+      <!-- Rendered dynamically by JS -->
+    </div>
+  </section>
+
+  <!-- Cinema Locations Section -->
+  <section class="container" id="cinemas" style="padding-bottom: 4rem;">
+    <div class="section-header" style="margin-bottom: 1.5rem;">
+      <h2 class="section-title">Hệ Thống Cụm Rạp Ngọc Châu</h2>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+      <div style="background-color: var(--bg-surface); border-radius: var(--radius-lg); padding: 1.5rem; border: 1px solid var(--border-color);">
+        <div style="font-size: 2rem; margin-bottom: 0.5rem;">🏛️</div>
+        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.4776483111245!2d106.69957890939955!3d10.77468175918408!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752f471ae80d77%3A0x86884c4f2118de42!2zQsOjaSB4ZSBUaMawxqFuZyB4w6EgVGF4LCAxMzUgTmd1ecOqzINuIEh1w6rMoywgU8OgaSBHw7JuLCBI4buTIENow60gTWluaCAxMDAwMDAsIFZp4buHdCBOYW0!5e0!3m2!1svi!2s!4v1787191868882!5m2!1svi!2s" width=100% height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+        <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--primary-gold); margin-bottom: 0.5rem;">Ngọc Châu Cinema Quận 1</h3>
+        <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem;">135 Nguyễn Huệ, Phường Bến Nghé, Quận 1, TP. HCM</p>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+          <span class="badge badge-gold">IMAX 3D</span>
+          <span class="badge badge-emerald">Dolby Atmos</span>
+        </div>
+      </div>
+
+      <div style="background-color: var(--bg-surface); border-radius: var(--radius-lg); padding: 1.5rem; border: 1px solid var(--border-color);">
+        <div style="font-size: 2rem; margin-bottom: 0.5rem;">🏛️</div>
+        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3918.4871224128938!2d106.75715850940055!3d10.850506157780776!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x317527a2bad1056d%3A0x3c7046a0b4057419!2zVmluY29tIFBsYXphLCAyMTYgxJAuIFbDtSBWxINuIE5nw6JuLCBQaMaw4budbmcsIFRo4bunIMSQ4bupYywgSOG7kyBDaMOtIE1pbmggNzAwMDAsIFZp4buHdCBOYW0!5e0!3m2!1svi!2s!4v1787191974829!5m2!1svi!2s" width=100% height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+        <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--primary-gold); margin-bottom: 0.5rem;">Ngọc Châu Cinema Thủ Đức</h3>
+        <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem;">216 Võ Văn Ngân, P. Bình Thọ, TP. Thủ Đức, TP. HCM</p>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+          <span class="badge badge-emerald">Dolby Atmos</span>
+          <span class="badge badge-gold">Ghế Đôi Sweetbox</span>
+        </div>
+      </div>
+
+      <div style="background-color: var(--bg-surface); border-radius: var(--radius-lg); padding: 1.5rem; border: 1px solid var(--border-color);">
+        <div style="font-size: 2rem; margin-bottom: 0.5rem;">🏛️</div>
+        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3723.9165725789035!2d105.77974780963179!3d21.036023887450508!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3135ab4ab82e8a2d%3A0xe52fd6b755ba654c!2zMjQxIMSQLiBYdcOibiBUaOG7p3ksIEPhuqd1IEdp4bqleSwgSMOgIE7hu5lpIDEwMDAwMCwgVmnhu4d0IE5hbQ!5e0!3m2!1svi!2s!4v1787192017507!5m2!1svi!2s" width=100% height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+        <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--primary-gold); margin-bottom: 0.5rem;">Ngọc Châu Cinema Cầu Giấy</h3>
+        <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem;">241 Xuân Thủy, Q. Cầu Giấy, Hà Nội</p>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+          <span class="badge badge-gold">Premium 4K</span>
+          <span class="badge badge-emerald">VIP Lounge</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Movie Detail Modal -->
+  <div class="modal-backdrop" id="movie-modal">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3 class="modal-title">Thông Tin Phim</h3>
+        <span class="modal-close" id="movie-modal-close">&times;</span>
+      </div>
+      <div class="modal-body" id="movie-modal-body">
+        <!-- Rendered dynamically by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <a href="index.html" class="brand" style="margin-bottom: 1rem;">
+            <img src="logo/logo.jpg" alt="Ngọc Châu Cinema Logo" class="brand-logo">
+            <div class="brand-text">
+              <span class="brand-title">NGỌC CHÂU</span>
+              <span class="brand-subtitle">CINEMA</span>
+            </div>
+          </a>
+          <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6;">
+            Hệ thống rạp chiếu phim hiện đại hàng đầu Việt Nam. Mang lại phút giây giải trí thăng hoa cùng điện ảnh chất lượng cao.
+          </p>
+        </div>
+
+        <div>
+          <h4 class="footer-col-title">Về Chúng Tôi</h4>
+          <div class="footer-links">
+            <a href="#" class="footer-link">Giới thiệu rạp</a>
+            <a href="#cinemas" class="footer-link">Cụm rạp chiếu</a>
+            <a href="#" class="footer-link">Tuyển dụng</a>
+            <a href="#" class="footer-link">Liên hệ QC</a>
+          </div>
+        </div>
+
+        <div>
+          <h4 class="footer-col-title">Quy Định & Điều Khoản</h4>
+          <div class="footer-links">
+            <a href="#" class="footer-link">Điều khoản sử dụng</a>
+            <a href="#" class="footer-link">Chính sách bảo mật</a>
+            <a href="#" class="footer-link">Chính sách thanh toán</a>
+            <a href="#" class="footer-link">Câu hỏi thường gặp</a>
+          </div>
+        </div>
+
+        <div>
+          <h4 class="footer-col-title">Tổng Đài Hỗ Trợ</h4>
+          <p style="font-size: 1.25rem; font-weight: 800; color: var(--primary-gold); margin-bottom: 0.5rem;">📞 1900 6868</p>
+          <p style="font-size: 0.85rem; color: var(--text-muted);">Hotline phục vụ từ 8:00 - 22:00 hàng ngày (kể cả Lễ, Tết).</p>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>&copy; 2026 Ngọc Châu Cinema. Tất cả quyền được bảo lưu.</p>
+        <p>Hệ thống Đặt Vé Trực Tuyến Bản Quyền Ngọc Châu</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- JS Modules -->
+  <script src="js/utils.js"></script>
+  <script src="js/db.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

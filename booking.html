@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Đặt Vé Xem Phim — Ngọc Châu Cinema</title>
+  
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/customer.css">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="navbar">
+    <div class="container">
+      <a href="index.html" class="brand">
+        <img src="logo/logo.jpg" alt="Ngọc Châu Cinema Logo" class="brand-logo">
+        <div class="brand-text">
+          <span class="brand-title">NGỌC CHÂU</span>
+          <span class="brand-subtitle">CINEMA</span>
+        </div>
+      </a>
+
+      <nav class="nav-links">
+        <a href="index.html" class="nav-link">Trang Chủ</a>
+        <a href="index.html#movies" class="nav-link">Phim Đang Chiếu</a>
+        <a href="index.html#cinemas" class="nav-link">Cụm Rạp</a>
+        <a href="booking.html" class="nav-link active">Đặt Vé</a>
+      </nav>
+
+      <div class="nav-actions">
+        <a href="index.html" class="btn btn-secondary btn-sm">← Trang Chủ</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Step Bar -->
+  <div class="booking-header">
+    <div class="container">
+      <div class="steps-bar">
+        <div class="step-item active" id="step-1-indicator">
+          <div class="step-num">1</div>
+          <div class="step-label">Địa Điểm & Suất</div>
+        </div>
+        <div class="step-item" id="step-2-indicator">
+          <div class="step-num">2</div>
+          <div class="step-label">Chọn Ghế</div>
+        </div>
+        <div class="step-item" id="step-3-indicator">
+          <div class="step-num">3</div>
+          <div class="step-label">Bắp Nước (F&B)</div>
+        </div>
+        <div class="step-item" id="step-4-indicator">
+          <div class="step-num">4</div>
+          <div class="step-label">Mã Giảm Giá</div>
+        </div>
+        <div class="step-item" id="step-5-indicator">
+          <div class="step-num">5</div>
+          <div class="step-label">Thanh Toán</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Booking Container Grid -->
+  <main class="container" style="padding: 2.5rem 1.5rem; flex: 1;">
+    <div style="display: grid; grid-template-columns: 1fr 340px; gap: 2rem;">
+      
+      <!-- Main Booking Step Dynamic Area -->
+      <form id="booking-form">
+        <div id="booking-step-content">
+          <!-- Dynamic Step Content Rendered by JS -->
+        </div>
+
+        <div style="display: flex; justify-content: space-between; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
+          <button type="button" class="btn btn-secondary" id="btn-prev-step">← Bước trước</button>
+          <button type="button" class="btn btn-primary" id="btn-next-step">Tiếp theo →</button>
+        </div>
+      </form>
+
+      <!-- Sidebar Summary Card -->
+      <aside>
+        <div class="summary-card">
+          <h4 class="summary-title">🎟️ Thông Tin Đặt Vé</h4>
+          
+          <div class="summary-row">
+            <span class="label">Phim:</span>
+            <span class="value" id="sum-movie">Chưa chọn</span>
+          </div>
+          <div class="summary-row">
+            <span class="label">Rạp chiếu:</span>
+            <span class="value" id="sum-cinema">Chưa chọn</span>
+          </div>
+          <div class="summary-row">
+            <span class="label">Suất chiếu:</span>
+            <span class="value" id="sum-time">Chưa chọn</span>
+          </div>
+          <div class="summary-row">
+            <span class="label">Ghế chọn:</span>
+            <span class="value" id="sum-seats" style="color: var(--primary-gold); font-weight: 700;">Chưa chọn</span>
+          </div>
+          <div class="summary-row">
+            <span class="label">Tiền vé:</span>
+            <span class="value" id="sum-ticket-price">0 ₫</span>
+          </div>
+          <div class="summary-row" id="sum-food-row" style="display: none;">
+            <span class="label">Bắp nước:</span>
+            <span class="value" id="sum-food-price" style="color: var(--accent-emerald); font-weight: 700;">0 ₫</span>
+          </div>
+          <div class="summary-row" id="sum-discount-row" style="display: none;">
+            <span class="label">Giảm giá:</span>
+            <span class="value" id="sum-discount-price" style="color: var(--accent-emerald); font-weight: 700;">-0 ₫</span>
+          </div>
+
+          <div class="summary-total">
+            <span>TỔNG CỘNG:</span>
+            <span class="total-price" id="sum-total">0 ₫</span>
+          </div>
+        </div>
+      </aside>
+
+    </div>
+  </main>
+
+  <!-- Customer Quick Login Modal -->
+  <div class="modal-backdrop" id="customer-login-modal">
+    <div class="modal-container" style="max-width: 420px;">
+      <div class="modal-header">
+        <h3 class="modal-title">🔑 Đăng Nhập Thành Viên</h3>
+        <span class="modal-close" id="modal-cust-login-close">&times;</span>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.25rem;">Đăng nhập để tự động áp dụng mã giảm giá ưu đãi dành riêng cho thành viên Ngọc Châu Cinema.</p>
+
+        <form id="customer-login-form">
+          <div class="form-group">
+            <label class="form-label" for="cust-login-input">Email hoặc Số điện thoại</label>
+            <input type="text" id="cust-login-input" class="form-control" placeholder="Ví dụ: 0901234567 hoặc an.nguyen@gmail.com" required value="0901234567">
+          </div>
+          <div style="background-color: var(--primary-gold-light); border: 1px solid var(--border-color-gold); padding: 0.75rem; border-radius: var(--radius-md); font-size: 0.8rem; color: var(--primary-gold); margin-bottom: 1.25rem;">
+            💡 Đăng nhập nhanh tài khoản mẫu: <code>0901234567</code> (Nguyễn Văn An)
+          </div>
+          <button type="submit" class="btn btn-primary" style="width: 100%;">ĐĂNG NHẬP KHÁCH HÀNG</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Booking Success Confirmation Modal -->
+  <div class="modal-backdrop" id="booking-success-modal">
+    <div class="modal-container" style="max-width: 520px; text-align: center; border: 2px solid var(--border-color-gold);">
+      <div class="modal-body" style="padding: 2.5rem 1.5rem;" id="success-modal-content">
+        <!-- Rendered dynamically by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container" style="text-align: center; color: var(--text-muted); font-size: 0.85rem;">
+      <p>&copy; 2026 Ngọc Châu Cinema — Đặt Vé Trực Tuyến Nhanh Chóng & An Toàn</p>
+    </div>
+  </footer>
+
+  <!-- JS Modules -->
+  <script src="js/utils.js"></script>
+  <script src="js/db.js"></script>
+  <script src="js/seats.js"></script>
+  <script src="js/booking.js"></script>
+</body>
+</html>

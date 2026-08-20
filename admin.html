@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard — Ngọc Châu Cinema</title>
+  
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/admin.css">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
+</head>
+<body>
+
+  <div class="admin-layout">
+    <!-- Sidebar -->
+    <aside class="admin-sidebar">
+      <div class="sidebar-header">
+        <a href="index.html" class="brand">
+          <img src="logo/logo.jpg" alt="Ngọc Châu Cinema Logo" class="brand-logo">
+          <div class="brand-text">
+            <span class="brand-title">NGỌC CHÂU</span>
+            <span class="brand-subtitle" id="portal-role-badge">ADMIN PORTAL</span>
+          </div>
+        </a>
+      </div>
+
+      <nav class="sidebar-menu" id="sidebar-menu-list">
+        <div class="menu-item active" data-tab="dashboard">
+          <span class="menu-item-icon">📊</span>
+          <span>Tổng quan (KPI)</span>
+        </div>
+        <div class="menu-item" data-tab="movies">
+          <span class="menu-item-icon">🎬</span>
+          <span>Quản lý Phim</span>
+        </div>
+        <div class="menu-item" data-tab="showtimes">
+          <span class="menu-item-icon">⏰</span>
+          <span>Quản lý Suất chiếu</span>
+        </div>
+        <div class="menu-item" data-tab="bookings">
+          <span class="menu-item-icon">🎟️</span>
+          <span>Quản lý Đơn đặt vé</span>
+        </div>
+        <div class="menu-item" data-tab="cinemas">
+          <span class="menu-item-icon">🏛️</span>
+          <span>Cụm rạp & Phòng</span>
+        </div>
+        <div class="menu-item" data-tab="promotions">
+          <span class="menu-item-icon">🎁</span>
+          <span>Quản lý Mã giảm giá</span>
+        </div>
+        <div class="menu-item" data-tab="approvals">
+          <span class="menu-item-icon">⏳</span>
+          <span>Phê duyệt (Duyệt nội dung)</span>
+        </div>
+        <div class="menu-item" data-tab="users">
+          <span class="menu-item-icon">👥</span>
+          <span>Tài khoản & Phân quyền</span>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="btn btn-danger btn-sm" style="width: 100%;" onclick="AdminApp.logout()">🚪 Đăng Xuất</button>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="admin-main">
+      <header class="admin-topbar">
+        <h2 class="topbar-title" id="topbar-title-text">Bảng Điều Hành Rạp Chiếu Phim</h2>
+        
+        <div class="user-profile">
+          <span style="font-size: 0.9rem; color: var(--text-secondary);" id="user-display-info">Xin chào, <strong>Quản trị viên</strong></span>
+          <div class="avatar" id="user-avatar">A</div>
+        </div>
+      </header>
+
+      <div class="admin-body" id="admin-content">
+        <!-- Rendered dynamically by AdminApp in JS -->
+      </div>
+    </main>
+  </div>
+
+  <!-- Add/Edit Movie Modal -->
+  <div class="modal-backdrop" id="movie-modal">
+    <div class="modal-container" style="max-width: 580px;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="movie-modal-title">🎬 Thêm Phim Mới</h3>
+        <span class="modal-close" onclick="AdminApp.closeMovieModal()">&times;</span>
+      </div>
+      <div class="modal-body">
+        <form id="movie-form">
+          <input type="hidden" id="movie-id">
+
+          <div class="form-group">
+            <label class="form-label" for="movie-title">Tên Phim <span style="color: var(--accent-red);">*</span></label>
+            <input type="text" id="movie-title" class="form-control" placeholder="Ví dụ: Deadpool & Wolverine" required>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label" for="movie-genre">Thể Loại <span style="color: var(--accent-red);">*</span></label>
+              <input type="text" id="movie-genre" class="form-control" placeholder="Ví dụ: Hành động, Hài hước" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="movie-duration">Thời Lượng (Phút) <span style="color: var(--accent-red);">*</span></label>
+              <input type="number" id="movie-duration" class="form-control" placeholder="120" min="30" max="300" required>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label" for="movie-age">Giới Hạn Độ Tuổi</label>
+              <select id="movie-age" class="form-control">
+                <option value="P">P — Phổ biến mọi lứa tuổi</option>
+                <option value="K">K — Dưới 13 tuổi xem cùng phụ huynh</option>
+                <option value="T13">T13 — Khán giả từ 13 tuổi</option>
+                <option value="T16">T16 — Khán giả từ 16 tuổi</option>
+                <option value="T18">T18 — Khán giả từ 18 tuổi</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="movie-status">Trạng Thái Chiếu</label>
+              <select id="movie-status" class="form-control">
+                <option value="now_showing">Đang chiếu</option>
+                <option value="coming_soon">Sắp chiếu</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label" for="movie-release">Ngày Khởi Chiếu</label>
+              <input type="date" id="movie-release" class="form-control">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="movie-poster">Đường Dẫn Poster (URL)</label>
+              <input type="url" id="movie-poster" class="form-control" placeholder="https://...">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="movie-desc">Mô Tả Nội Dung Phim</label>
+            <textarea id="movie-desc" class="form-control" rows="3" placeholder="Tóm tắt ngắn gọn nội dung phim..."></textarea>
+          </div>
+
+          <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem;">
+            <button type="button" class="btn btn-secondary" onclick="AdminApp.closeMovieModal()">Hủy Bỏ</button>
+            <button type="submit" class="btn btn-primary" id="btn-save-movie">💾 LƯU PHIM</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add/Edit Showtime Modal -->
+  <div class="modal-backdrop" id="showtime-modal">
+    <div class="modal-container" style="max-width: 540px;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="showtime-modal-title">⏰ Thêm Suất Chiếu Mới</h3>
+        <span class="modal-close" onclick="AdminApp.closeShowtimeModal()">&times;</span>
+      </div>
+      <div class="modal-body">
+        <form id="showtime-form">
+          <input type="hidden" id="showtime-id">
+
+          <div class="form-group">
+            <label class="form-label" for="showtime-movie-id">Chọn Phim Chiếu <span style="color: var(--accent-red);">*</span></label>
+            <select id="showtime-movie-id" class="form-control" required>
+              <!-- Loaded by JS -->
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="showtime-screen-id">Chọn Cụm Rạp & Phòng Chiếu <span style="color: var(--accent-red);">*</span></label>
+            <select id="showtime-screen-id" class="form-control" required>
+              <!-- Loaded by JS -->
+            </select>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label" for="showtime-date">Ngày Chiếu <span style="color: var(--accent-red);">*</span></label>
+              <input type="date" id="showtime-date" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="showtime-time">Giờ Khởi Chiếu <span style="color: var(--accent-red);">*</span></label>
+              <input type="text" id="showtime-time" class="form-control" placeholder="Ví dụ: 14:30" required>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label" for="showtime-price">Giá Vé Cơ Bản (VNĐ) <span style="color: var(--accent-red);">*</span></label>
+              <input type="number" id="showtime-price" class="form-control" placeholder="110000" step="5000" min="50000" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="showtime-status">Trạng Thái Suất Chiếu</label>
+              <select id="showtime-status" class="form-control">
+                <option value="active">Hoạt động (Mở bán vé)</option>
+                <option value="inactive">Tạm ngưng bán vé</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem;">
+            <button type="button" class="btn btn-secondary" onclick="AdminApp.closeShowtimeModal()">Hủy Bỏ</button>
+            <button type="submit" class="btn btn-primary" id="btn-save-showtime">💾 LƯU SUẤT CHIẾU</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add/Edit Cinema Cluster Modal -->
+  <div class="modal-backdrop" id="cinema-modal">
+    <div class="modal-container" style="max-width: 520px;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="cinema-modal-title">🏛️ Thêm Cụm Rạp Mới</h3>
+        <span class="modal-close" onclick="AdminApp.closeCinemaModal()">&times;</span>
+      </div>
+      <div class="modal-body">
+        <form id="cinema-form">
+          <input type="hidden" id="cinema-id">
+
+          <div class="form-group">
+            <label class="form-label" for="cinema-name">Tên Cụm Rạp <span style="color: var(--accent-red);">*</span></label>
+            <input type="text" id="cinema-name" class="form-control" placeholder="Ví dụ: Ngọc Châu Cinema Tân Bình" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="cinema-address">Địa Chỉ Rạp <span style="color: var(--accent-red);">*</span></label>
+            <input type="text" id="cinema-address" class="form-control" placeholder="Ví dụ: 20 Tân Kỳ Tân Quý, Q. Tân Bình" required>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label" for="cinema-city">Thành Phố</label>
+              <input type="text" id="cinema-city" class="form-control" placeholder="TP. Hồ Chí Minh">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="cinema-status">Trạng Thái</label>
+              <select id="cinema-status" class="form-control">
+                <option value="active">Hoạt động</option>
+                <option value="inactive">Tạm ngưng</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem;">
+            <button type="button" class="btn btn-secondary" onclick="AdminApp.closeCinemaModal()">Hủy Bỏ</button>
+            <button type="submit" class="btn btn-primary">💾 LƯU CỤM RẠP</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add/Edit Screen Modal -->
+  <div class="modal-backdrop" id="screen-modal">
+    <div class="modal-container" style="max-width: 480px;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="screen-modal-title">🎦 Thêm Phòng Chiếu Mới</h3>
+        <span class="modal-close" onclick="AdminApp.closeScreenModal()">&times;</span>
+      </div>
+      <div class="modal-body">
+        <form id="screen-form">
+          <input type="hidden" id="screen-id">
+          <input type="hidden" id="screen-cinema-id">
+
+          <div class="form-group">
+            <label class="form-label" for="screen-name">Tên Phòng Chiếu <span style="color: var(--accent-red);">*</span></label>
+            <input type="text" id="screen-name" class="form-control" placeholder="Ví dụ: Phòng 03 - IMAX Laser" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="screen-total-seats">Tổng Số Ghế Khởi Tạo</label>
+            <input type="number" id="screen-total-seats" class="form-control" value="60" min="20" max="200" required>
+          </div>
+
+          <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem;">
+            <button type="button" class="btn btn-secondary" onclick="AdminApp.closeScreenModal()">Hủy Bỏ</button>
+            <button type="submit" class="btn btn-primary">💾 LƯU PHÒNG CHIẾU</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add/Edit Promotion Modal -->
+  <div class="modal-backdrop" id="promo-modal">
+    <div class="modal-container" style="max-width: 500px;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="promo-modal-title">🎁 Thêm Mã Giảm Giá Mới</h3>
+        <span class="modal-close" onclick="AdminApp.closePromoModal()">&times;</span>
+      </div>
+      <div class="modal-body">
+        <form id="promo-form">
+          <input type="hidden" id="promo-id">
+
+          <div class="form-group">
+            <label class="form-label" for="promo-code">Mã Giảm Giá (Code) <span style="color: var(--accent-red);">*</span></label>
+            <input type="text" id="promo-code" class="form-control" placeholder="Ví dụ: GIAM50K, KM2026" style="text-transform: uppercase;" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="promo-desc">Mô Tả Mã Giảm Giá</label>
+            <input type="text" id="promo-desc" class="form-control" placeholder="Ví dụ: Giảm 20% tổng đơn đặt vé cho thành viên">
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label" for="promo-type">Loại Giảm Giá</label>
+              <select id="promo-type" class="form-control">
+                <option value="percentage">Phần trăm (%)</option>
+                <option value="fixed">Số tiền cố định (VNĐ)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="promo-val">Giá Trị Giảm <span style="color: var(--accent-red);">*</span></label>
+              <input type="number" id="promo-val" class="form-control" placeholder="10 hoặc 50000" min="1" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="promo-min-order">Đơn Hàng Tối Thiểu (VNĐ)</label>
+            <input type="number" id="promo-min-order" class="form-control" value="0" min="0" step="10000">
+          </div>
+
+          <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem;">
+            <button type="button" class="btn btn-secondary" onclick="AdminApp.closePromoModal()">Hủy Bỏ</button>
+            <button type="submit" class="btn btn-primary">💾 LƯU MÃ GIẢM GIÁ</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add/Edit User & Role Assignment Modal -->
+  <div class="modal-backdrop" id="user-modal">
+    <div class="modal-container" style="max-width: 520px;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="user-modal-title">⚙️ Phân Quyền & Quản Lý Tài Khoản</h3>
+        <span class="modal-close" onclick="AdminApp.closeUserModal()">&times;</span>
+      </div>
+      <div class="modal-body">
+        <form id="user-form">
+          <input type="hidden" id="user-id">
+
+          <div class="form-group">
+            <label class="form-label" for="user-fullname">Họ và Tên <span style="color: var(--accent-red);">*</span></label>
+            <input type="text" id="user-fullname" class="form-control" placeholder="Ví dụ: Nguyễn Văn Quản Trị" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="user-email">Email Đăng Nhập <span style="color: var(--accent-red);">*</span></label>
+            <input type="email" id="user-email" class="form-control" placeholder="Ví dụ: staff6@demo.com" required>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label" for="user-phone">Số Điện Thoại</label>
+              <input type="tel" id="user-phone" class="form-control" placeholder="0901234567">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="user-password">Mật Khẩu Mới</label>
+              <input type="password" id="user-password" class="form-control" placeholder="Để trống nếu không đổi">
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label" for="user-role">Phân Quyền Vai Trò (Role) <span style="color: var(--accent-red);">*</span></label>
+              <select id="user-role" class="form-control" required style="font-weight: 700;">
+                <option value="admin">👑 ADMIN — Quản trị toàn hệ thống</option>
+                <option value="staff">⏰ STAFF — Nhân viên (Quản lý Suất chiếu)</option>
+                <option value="sponsor">🎬 NHÀ TÀI TRỢ — Partner (Quản lý Phim)</option>
+                <option value="user">🎟️ USER — Khách hàng thành viên</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="user-status">Trạng Thái Tài Khoản</label>
+              <select id="user-status" class="form-control">
+                <option value="active">✓ Hoạt động (Active)</option>
+                <option value="inactive">🔒 Khóa tài khoản</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem;">
+            <button type="button" class="btn btn-secondary" onclick="AdminApp.closeUserModal()">Hủy Bỏ</button>
+            <button type="submit" class="btn btn-primary">💾 LƯU PHÂN QUYỀN</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Booking Detail & Management Modal -->
+  <div class="modal-backdrop" id="booking-modal">
+    <div class="modal-container" style="max-width: 600px;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="booking-modal-title">🎟️ Chi Tiết Đơn Đặt Vé</h3>
+        <span class="modal-close" onclick="AdminApp.closeBookingModal()">&times;</span>
+      </div>
+      <div class="modal-body" id="booking-modal-body">
+        <!-- Rendered dynamically by JS -->
+      </div>
+    </div>
+  </div>
+
+  <script src="js/utils.js"></script>
+  <script src="js/db.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

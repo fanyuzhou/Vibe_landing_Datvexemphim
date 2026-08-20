@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Xác Nhận Đặt Vé & Vé Điện Tử — Ngọc Châu Cinema</title>
+  
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/customer.css">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="navbar">
+    <div class="container">
+      <a href="index.html" class="brand">
+        <img src="logo/logo.jpg" alt="Ngọc Châu Cinema Logo" class="brand-logo">
+        <div class="brand-text">
+          <span class="brand-title">NGỌC CHÂU</span>
+          <span class="brand-subtitle">CINEMA</span>
+        </div>
+      </a>
+      <a href="index.html" class="btn btn-secondary btn-sm">🏠 Về Trang Chủ</a>
+    </div>
+  </header>
+
+  <!-- Success & E-Ticket Main Card -->
+  <main class="container" style="padding: 3rem 1.5rem; flex: 1;">
+    <div class="e-ticket-container" id="ticket-main-wrapper">
+      <!-- Rendered dynamically by JS -->
+    </div>
+
+    <!-- Printable Action Bar -->
+    <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 2rem;" id="printable-action-bar">
+      <button type="button" class="btn btn-secondary btn-lg" onclick="window.print()">📄 Xuất / In Vé Điện Tử PDF</button>
+      <a href="booking.html" class="btn btn-primary btn-lg">🎟️ Đặt Vé Phim Khác</a>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container" style="text-align: center; color: var(--text-muted); font-size: 0.85rem;">
+      <p>&copy; 2026 Ngọc Châu Cinema — Cảm ơn bạn đã lựa chọn dịch vụ của chúng tôi!</p>
+    </div>
+  </footer>
+
+  <!-- JS Modules -->
+  <script src="js/utils.js"></script>
+  <script src="js/db.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      await DB.init();
+      const params = Utils.getQueryParams();
+      const bookingCode = params.booking_code;
+
+      const container = document.getElementById('ticket-main-wrapper');
+      if (!bookingCode) {
+        container.innerHTML = `
+          <div style="padding: 3rem; text-align: center; color: var(--text-muted);">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">⚠️</div>
+            <h3>Không tìm thấy mã đơn vé!</h3>
+            <a href="index.html" class="btn btn-primary" style="margin-top: 1rem;">Quay lại Trang chủ</a>
+          </div>
+        `;
+        return;
+      }
+
+      const booking = DB.getBookingByCode(bookingCode);
+      if (!booking) {
+        container.innerHTML = `
+          <div style="padding: 3rem; text-align: center; color: var(--text-muted);">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">❌</div>
+            <h3>Mã vé không tồn tại hoặc đã bị hủy.</h3>
+            <a href="index.html" class="btn btn-primary" style="margin-top: 1rem;">Quay lại Trang chủ</a>
+          </div>
+        `;
+        return;
+      }
+
+      const seatsStr = booking.seats ? booking.seats.map(s => s.seat_code).join(', ') : 'N/A';
+      const paymentMap = {
+        momo: 'Ví điện tử MoMo',
+        zalopay: 'ZaloPay / VNPay QR',
+        card: 'Thẻ ATM / Visa / Mastercard',
+        cash: 'Thanh toán tiền mặt tại rạp'
+      };
+
+      container.innerHTML = `
+        <!-- E-Ticket Header -->
+        <div class="e-ticket-header">
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <img src="logo/logo.jpg" alt="Logo" style="width: 48px; height: 48px; border-radius: 50%; border: 2px solid var(--primary-gold);">
+            <div>
+              <div style="font-weight: 800; font-size: 1.25rem; color: var(--primary-gold);">NGỌC CHÂU CINEMA</div>
+              <div style="font-size: 0.8rem; color: var(--text-secondary);">VÉ XEM PHIM ĐIỆN TỬ (E-TICKET)</div>
+            </div>
+          </div>
+          <div style="text-align: right;">
+            <span class="badge badge-emerald" style="font-size: 0.85rem; padding: 0.35rem 0.85rem;">
+              ✓ ${booking.payment_method === 'cash' ? 'CHỜ XÁC NHẬN TẠI QUẦY' : 'ĐÃ THANH TOÁN'}
+            </span>
+          </div>
+        </div>
+
+        <!-- E-Ticket Main Stub Body -->
+        <div class="e-ticket-stub">
+          <div>
+            <div style="display: flex; gap: 1.25rem; margin-bottom: 1.5rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--border-color);">
+              <img src="${booking.movie_poster}" alt="${booking.movie_title}" style="width: 100px; height: 145px; object-fit: cover; border-radius: var(--radius-md); box-shadow: var(--shadow-md);">
+              <div>
+                <h2 style="font-size: 1.4rem; font-weight: 800; color: var(--text-primary); margin-bottom: 0.5rem;">${booking.movie_title}</h2>
+                <p style="font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 0.25rem;">🏛️ <strong>${booking.cinema_name}</strong> (${booking.screen_name})</p>
+                <p style="font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 0.5rem;">📅 Suất: <strong style="color: var(--primary-gold);">${booking.start_time}</strong> — Ngày <strong>${Utils.formatDate(booking.show_date)}</strong></p>
+                <p style="font-size: 1.1rem; color: var(--primary-gold); font-weight: 800;">💺 Vị trí ghế: ${seatsStr}</p>
+              </div>
+            </div>
+
+            <!-- Customer & Itemized Breakdown Details -->
+            <div style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.9rem; color: var(--text-secondary);">
+              <div style="display: flex; justify-content: space-between;">
+                <span>Họ tên người nhận vé:</span>
+                <strong style="color: var(--text-primary);">${booking.customer_name}</strong>
+              </div>
+              <div style="display: flex; justify-content: space-between;">
+                <span>Số điện thoại SMS:</span>
+                <strong style="color: var(--text-primary);">${booking.customer_phone}</strong>
+              </div>
+              <div style="display: flex; justify-content: space-between;">
+                <span>Phương thức thanh toán:</span>
+                <strong style="color: var(--primary-gold);">${paymentMap[booking.payment_method] || 'Ví điện tử'}</strong>
+              </div>
+
+              ${booking.food_details ? `
+                <div style="background-color: var(--bg-card); padding: 0.75rem 1rem; border-radius: var(--radius-sm); margin: 0.5rem 0; border: 1px solid var(--border-color);">
+                  🍿 <strong>Bắp Nước F&B:</strong> ${booking.food_details}
+                </div>
+              ` : ''}
+
+              ${booking.discount_code ? `
+                <div style="display: flex; justify-content: space-between; color: var(--accent-emerald);">
+                  <span>Mã giảm giá (${booking.discount_code}):</span>
+                  <strong>-${Utils.formatCurrency(booking.discount_amount)}</strong>
+                </div>
+              ` : ''}
+
+              <div style="display: flex; justify-content: space-between; padding-top: 0.85rem; border-top: 1px solid var(--border-color); margin-top: 0.5rem; font-size: 1.15rem;">
+                <span style="font-weight: 700; color: var(--text-primary);">Tổng số tiền:</span>
+                <strong style="font-size: 1.5rem; color: var(--primary-gold);">${Utils.formatCurrency(booking.total_amount)}</strong>
+              </div>
+            </div>
+          </div>
+
+          <!-- Barcode QR Pass Container -->
+          <div class="ticket-barcode-box">
+            <div style="font-size: 0.75rem; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.35rem;">MÃ VÉ ĐIỆN TỬ</div>
+            <div style="font-size: 1.4rem; font-weight: 900; color: #0f172a; font-family: monospace; letter-spacing: 2px; margin-bottom: 0.75rem;">${booking.booking_code}</div>
+            
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${booking.booking_code}" alt="Barcode QR Code" style="width: 140px; height: 140px; margin-bottom: 0.75rem;">
+            
+            <div style="font-size: 0.75rem; color: #64748b; line-height: 1.4;">
+              Quét mã QR tại máy soi cửa soát vé Ngọc Châu Cinema để vào phòng chiếu.
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Auto-trigger native PDF export dialog if auto_pdf=true
+      if (params.auto_pdf === 'true') {
+        Utils.showToast('🎉 Đặt vé thành công! Đang mở hộp thoại xuất Vé Điện Tử PDF...', 'success');
+        setTimeout(() => {
+          window.print();
+        }, 600);
+      }
+    });
+  </script>
+</body>
+</html>

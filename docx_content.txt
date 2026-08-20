@@ -1,0 +1,28 @@
+TRƯỜNG ĐẠI HỌC KHOA HỌC TỰ NHIÊN – ĐHQG TP.HCM 
+ĐỀ THI CUỐI KHÓA
+Môn: Generative AI – Nền tảng và ứng dụng 
+Thời gian: 120 phút
+Họ và tên: Phạm Ngọc Châu
+PHẦN II – VIBE CODING
+Nội dung báo cáo:
+Mô tả dự án lĩnh vực đặt vé xem phim, logo tự tạo
+Các trang trong dự án (Trang Chủ, Về Chúng Tôi, Chi tiết sản phẩm…)
+Bao gồm các chức năng:
+Liệt kê các file .md và chức năng của file. 
+Bộ file gồm
+01_PROJECT_REQUIREMENTS.md — yêu cầu tổng thể của dự án 
+02_TECHNICAL_ARCHITECTURE.md — kiến trúc và cấu trúc thư mục 
+03_DATABASE_SCHEMA.md — thiết kế database SQLite và các bảng 
+04_CUSTOMER_PAGE_SPEC.md — đặc tả trang khách hàng đặt vé 
+05_ADMIN_PAGE_SPEC.md — đặc tả trang Admin 
+06_VIBE_CODING_PROMPT.md — prompt chính để đưa cho AI Coding Agent 
+07_README_FOR_LEARNER.md — hướng dẫn học và thứ tự triển khai
+Thứ tự các prompt trong conversation và kết quả của từng prompt
+Promt1: hãy tạo giúp tôi tạo logo về rạp chiếu phim Ngọc Châu cinema và lưu vào thư mục logo để thiết kế trang
+Promt 2:
+Tôi đang học cách dùng Antigravity, Vibe Coding, tạo file .MD Tôi muốn tạo 1 trang landing page đặt vé xem phim bao gồm một trang cho người dùng đặt vé và một trang admin quản lý việc đặt vé . Ngôn ngữ lập trình: chỉ sử dụng HTML CSS JavaScript và database SQLite. Không sử dụng backend.. Hãy tạo cho tôi các file .MD cần thiết
+Promt 3:
+Hãy đọc các file .md trong folder.
+Hãy tạo project dựa trên các file .md này
+Sử dụng hình ảnh trong file logo để nhúng vào giao diện trang web đặt vé xem phim Ngọc Châu Cinema
+Promt 4: bắt đầu khởi tạo dự án
