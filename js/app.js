@@ -42,13 +42,19 @@ const App = {
 
     const isAdminOrManagement = this.isLoggedIn && this.currentUser && ['admin', 'staff', 'sponsor'].includes(this.currentUser.role);
 
-    // Hide "Quản Trị Viên" link on navbar for regular USER role or unauthenticated users
+    // Link "Quản Trị Viên" directly to admin.html and sync active session
     if (adminNavLink) {
-      if (isAdminOrManagement) {
+      if (this.isLoggedIn && this.currentUser && this.currentUser.role === 'user') {
+        adminNavLink.style.display = 'none';
+      } else {
         adminNavLink.style.display = 'inline-block';
         adminNavLink.href = 'admin.html';
-      } else {
-        adminNavLink.style.display = 'none';
+        adminNavLink.onclick = () => {
+          if (this.currentUser && ['admin', 'staff', 'sponsor'].includes(this.currentUser.role)) {
+            sessionStorage.setItem('active_user', JSON.stringify(this.currentUser));
+            sessionStorage.setItem('admin_logged_in', 'true');
+          }
+        };
       }
     }
 
@@ -69,7 +75,7 @@ const App = {
               </div>
             </div>
             ${isAdminOrManagement ? `
-              <a href="admin.html" class="user-dropdown-item" style="color: var(--primary-gold);">⚙️ Trang Quản Trị</a>
+              <a href="admin.html" class="user-dropdown-item" style="color: var(--primary-gold);" onclick="sessionStorage.setItem('active_user', JSON.stringify(App.currentUser)); sessionStorage.setItem('admin_logged_in', 'true');">⚙️ Trang Quản Trị</a>
             ` : ''}
             <button type="button" class="user-dropdown-item" style="color: var(--accent-red);" onclick="App.handleLogout()">
               🚪 Đăng Xuất
