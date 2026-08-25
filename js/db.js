@@ -1,14 +1,42 @@
-/**
- * Database Module (SQLite in Browser via SQL.js & RBAC Multi-Role Support) — Ngọc Châu Cinema
- */
+const SUPABASE_CONFIG = {
+  url: 'https://emvdkwrgxvzvoqriqtis.supabase.co',
+  key: 'sb_publishable_ZA96n1hCTKorLijnYrkjjg_x57l3w62'
+};
 
 const DB = {
   db: null,
+  supabase: null,
   isInitialized: false,
   STORAGE_KEY: 'ngoc_chau_cinema_sqlite_db',
 
+  initSupabase() {
+    try {
+      if (window.supabase && typeof window.supabase.createClient === 'function') {
+        this.supabase = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.key);
+        console.log("⚡ Supabase Backend Connected! Project URL:", SUPABASE_CONFIG.url);
+      } else {
+        console.warn("Supabase Client SDK not detected on global window.");
+      }
+    } catch (e) {
+      console.warn("Supabase client connection exception:", e);
+    }
+  },
+
+  async syncToSupabase(table, record) {
+    if (!this.supabase) return;
+    try {
+      const { error } = await this.supabase.from(table).upsert(record);
+      if (error) console.warn(`Supabase Sync Warning [${table}]:`, error.message);
+      else console.log(`✓ Realtime synced to Supabase Cloud [${table}]`);
+    } catch (e) {
+      console.warn(`Supabase sync exception [${table}]:`, e);
+    }
+  },
+
   async init() {
     if (this.isInitialized) return this;
+
+    this.initSupabase();
 
     try {
       if (window.initSqlJs) {
