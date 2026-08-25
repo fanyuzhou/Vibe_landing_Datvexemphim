@@ -1223,16 +1223,93 @@ const DB = {
 
   findCustomerByEmailOrPhone(emailOrPhone) {
     if (!this.db || !emailOrPhone) return null;
-    const term = emailOrPhone.trim();
+    const term = emailOrPhone.trim().toLowerCase();
     if (!term) return null;
     try {
-      const res = this.db.exec(`SELECT * FROM customers WHERE (email != '' AND email = '${term}') OR (phone != '' AND phone = '${term}')`);
+      const res = this.db.exec(`SELECT * FROM customers WHERE (email != '' AND LOWER(email) = '${term}') OR (phone != '' AND phone = '${term}')`);
       if (res.length && res[0].values.length) {
         return this.mapRows(res[0])[0];
       }
     } catch (e) {
       console.warn("Error finding customer:", e);
     }
+    return null;
+  },
+
+  registerCustomer(data) {
+    if (!this.db) throw new Error("Cơ sở dữ liệu chưa được khởi tạo!");
+    const name = (data.full_name || '').trim();
+    const email = (data.email || '').trim().toLowerCase();
+    const phone = (data.phone || '').trim();
+    const password = (data.password || '').trim() || '123456';
+
+    if (!name || (!email && !phone)) {
+      throw new Error("Vui lòng nhập Họ tên và Email hoặc Số điện thoại!");
+    }
+
+    const existing = this.findCustomerByEmailOrPhone(email || phone);
+    if (existing) {
+      throw new Error("Email hoặc Số điện thoại này đã tồn tại trên hệ thống!");
+    }
+
+    this.db.run(
+      `INSERT INTO customers (full_name, email, phone, password) VALUES (?, ?, ?, ?)`,
+      [name, email, phone, password]
+    );
+
+    const custIdRes = this.db.exec(`SELECT last_insert_rowid() as id`);
+    const custId = (custIdRes.length && custIdRes[0].values.length) ? custIdRes[0].values[0][0] : Date.now();
+
+    if (email) {
+      try {
+        this.db.run(
+          `INSERT INTO users (full_name, email, phone, password, role) VALUES (?, ?, ?, ?, 'user')`,
+          [name, email, phone, password]
+        );
+      } catch (e) {}
+    }
+
+    this.save();
+    return {
+      id: custId,
+      full_name: name,
+      email: email,
+      phone: phone,
+      role: 'user'
+    };
+  },
+
+  loginCustomer(emailOrPhone, password) {
+    if (!this.db || !emailOrPhone) return null;
+    const term = emailOrPhone.trim().toLowerCase();
+    const pass = (password || '').trim();
+
+    // Check users table first
+    const userAuth = this.authenticateUser(term, pass);
+    if (userAuth) {
+      return {
+        id: userAuth.id,
+        full_name: userAuth.full_name,
+        email: userAuth.email,
+        phone: userAuth.phone || '',
+        role: userAuth.role
+      };
+    }
+
+    // Check customers table
+    const cust = this.findCustomerByEmailOrPhone(term);
+    if (cust) {
+      if (!cust.password || cust.password === pass || !pass) {
+        return {
+          id: cust.id,
+          full_name: cust.full_name,
+          email: cust.email || '',
+          phone: cust.phone || '',
+          role: 'user'
+        };
+      }
+    }
+
     return null;
   },
 

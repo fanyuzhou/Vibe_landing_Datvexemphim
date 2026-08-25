@@ -36,6 +36,9 @@
       </nav>
 
       <div class="nav-actions">
+        <div id="auth-nav-container" style="display: flex; align-items: center; gap: 0.5rem;">
+          <!-- Rendered dynamically by App.renderAuthUI() -->
+        </div>
         <a href="booking.html" class="btn btn-primary btn-sm">🎟️ Đặt Vé Ngay</a>
         <button class="mobile-menu-btn" id="mobile-menu-btn">☰</button>
       </div>
@@ -133,6 +136,58 @@
       </div>
       <div class="modal-body" id="movie-modal-body">
         <!-- Rendered dynamically by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Customer Auth Modal (Login / Register) -->
+  <div class="modal-backdrop" id="auth-modal">
+    <div class="modal-container" style="max-width: 450px;">
+      <div class="modal-header">
+        <div class="auth-tabs" style="display: flex; gap: 1rem; border-bottom: 2px solid var(--border-color); width: 100%;">
+          <button type="button" id="tab-login-btn" class="auth-tab-btn active" onclick="App.switchAuthTab('login')">🔑 Đăng Nhập</button>
+          <button type="button" id="tab-register-btn" class="auth-tab-btn" onclick="App.switchAuthTab('register')">📝 Đăng Ký</button>
+        </div>
+        <span class="modal-close" id="auth-modal-close">&times;</span>
+      </div>
+      
+      <div class="modal-body" style="padding-top: 1.5rem;">
+        <!-- Login Form -->
+        <form id="auth-login-form">
+          <div class="form-group" style="margin-bottom: 1.25rem;">
+            <label class="form-label">Email hoặc Số điện thoại <span style="color: var(--accent-red);">*</span></label>
+            <input type="text" id="auth-login-input" class="form-control" placeholder="Ví dụ: user1@demo.com hoặc 0901234567" required>
+          </div>
+          <div class="form-group" style="margin-bottom: 1.5rem;">
+            <label class="form-label">Mật khẩu <span style="color: var(--accent-red);">*</span></label>
+            <input type="password" id="auth-login-pass" class="form-control" placeholder="Nhập mật khẩu (Mặc định: 123456)" required>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block btn-lg" style="margin-bottom: 1rem; width: 100%;">🔑 ĐĂNG NHẬP NGAY</button>
+          <div style="font-size: 0.8rem; color: var(--text-muted); background: var(--bg-surface); padding: 0.75rem; border-radius: var(--radius-md); border: 1px dashed var(--border-color-gold); text-align: center;">
+            💡 Tài khoản thử nghiệm: <code>user1@demo.com</code> | Mật khẩu: <code>123456</code>
+          </div>
+        </form>
+
+        <!-- Register Form -->
+        <form id="auth-register-form" style="display: none;">
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="form-label">Họ và tên <span style="color: var(--accent-red);">*</span></label>
+            <input type="text" id="auth-reg-name" class="form-control" placeholder="Ví dụ: Nguyễn Văn An" required>
+          </div>
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="form-label">Số điện thoại <span style="color: var(--accent-red);">*</span></label>
+            <input type="tel" id="auth-reg-phone" class="form-control" placeholder="Ví dụ: 0901234567" required>
+          </div>
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="form-label">Email nhận vé điện tử</label>
+            <input type="email" id="auth-reg-email" class="form-control" placeholder="Ví dụ: user@gmail.com">
+          </div>
+          <div class="form-group" style="margin-bottom: 1.5rem;">
+            <label class="form-label">Mật khẩu <span style="color: var(--accent-red);">*</span></label>
+            <input type="password" id="auth-reg-pass" class="form-control" placeholder="Tạo mật khẩu đăng nhập..." required>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block btn-lg" style="margin-bottom: 1rem; width: 100%;">✨ ĐĂNG KÝ TÀI KHOẢN</button>
+        </form>
       </div>
     </div>
   </div>

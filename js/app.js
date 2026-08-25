@@ -10,10 +10,139 @@ document.addEventListener('DOMContentLoaded', async () => {
 const App = {
   currentTab: 'now_showing',
   searchQuery: '',
+  isLoggedIn: false,
+  currentUser: null,
 
   init() {
+    this.checkAuthStatus();
     this.bindEvents();
     this.renderMovies();
+    this.renderAuthUI();
+  },
+
+  checkAuthStatus() {
+    const saved = localStorage.getItem('ngoc_chau_customer');
+    if (saved) {
+      try {
+        this.isLoggedIn = true;
+        this.currentUser = JSON.parse(saved);
+      } catch (e) {
+        this.isLoggedIn = false;
+        this.currentUser = null;
+      }
+    } else {
+      this.isLoggedIn = false;
+      this.currentUser = null;
+    }
+  },
+
+  renderAuthUI() {
+    const container = document.getElementById('auth-nav-container');
+    if (!container) return;
+
+    if (this.isLoggedIn && this.currentUser) {
+      container.innerHTML = `
+        <div class="user-pill-container">
+          <button type="button" class="user-pill-btn" onclick="App.toggleUserDropdown()">
+            <span>👤 ${this.currentUser.full_name || 'Thành viên'}</span>
+            <span style="font-size: 0.7rem;">▼</span>
+          </button>
+          <div class="user-dropdown-menu" id="user-dropdown-menu">
+            <div style="padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color); font-size: 0.8rem; color: var(--text-muted);">
+              ${this.currentUser.email || this.currentUser.phone || 'Thành viên Ngọc Châu'}
+            </div>
+            ${['admin', 'staff', 'sponsor'].includes(this.currentUser.role) ? `
+              <a href="admin.html" class="user-dropdown-item">⚙️ Trang Quản Trị</a>
+            ` : ''}
+            <button type="button" class="user-dropdown-item" style="color: var(--accent-red);" onclick="App.handleLogout()">
+              🚪 Đăng Xuất
+            </button>
+          </div>
+        </div>
+      `;
+    } else {
+      container.innerHTML = `
+        <button type="button" class="btn btn-secondary btn-sm" onclick="App.openAuthModal('login')">🔑 Đăng Nhập</button>
+        <button type="button" class="btn btn-outline btn-sm" onclick="App.openAuthModal('register')">📝 Đăng Ký</button>
+      `;
+    }
+  },
+
+  toggleUserDropdown() {
+    const menu = document.getElementById('user-dropdown-menu');
+    if (menu) menu.classList.toggle('show');
+  },
+
+  openAuthModal(mode = 'login') {
+    const modal = document.getElementById('auth-modal');
+    if (modal) {
+      this.switchAuthTab(mode);
+      modal.classList.add('show');
+    }
+  },
+
+  closeAuthModal() {
+    const modal = document.getElementById('auth-modal');
+    if (modal) modal.classList.remove('show');
+  },
+
+  switchAuthTab(mode) {
+    const loginBtn = document.getElementById('tab-login-btn');
+    const regBtn = document.getElementById('tab-register-btn');
+    const loginForm = document.getElementById('auth-login-form');
+    const regForm = document.getElementById('auth-register-form');
+
+    if (mode === 'login') {
+      if (loginBtn) loginBtn.classList.add('active');
+      if (regBtn) regBtn.classList.remove('active');
+      if (loginForm) loginForm.style.display = 'block';
+      if (regForm) regForm.style.display = 'none';
+    } else {
+      if (regBtn) regBtn.classList.add('active');
+      if (loginBtn) loginBtn.classList.remove('active');
+      if (regForm) regForm.style.display = 'block';
+      if (loginForm) loginForm.style.display = 'none';
+    }
+  },
+
+  handleLogin(emailOrPhone, password) {
+    try {
+      const user = DB.loginCustomer(emailOrPhone, password);
+      if (user) {
+        this.isLoggedIn = true;
+        this.currentUser = user;
+        localStorage.setItem('ngoc_chau_customer', JSON.stringify(user));
+        Utils.showToast(`Đăng nhập thành công! Xin chào ${user.full_name}`, 'success');
+        this.closeAuthModal();
+        this.renderAuthUI();
+      } else {
+        Utils.showToast('Email/SĐT hoặc mật khẩu không chính xác!', 'error');
+      }
+    } catch (e) {
+      Utils.showToast(e.message || 'Lỗi đăng nhập!', 'error');
+    }
+  },
+
+  handleRegister(name, phone, email, password) {
+    try {
+      const user = DB.registerCustomer({ full_name: name, phone, email, password });
+      this.isLoggedIn = true;
+      this.currentUser = user;
+      localStorage.setItem('ngoc_chau_customer', JSON.stringify(user));
+      Utils.showToast(`Đăng ký thành công! Chào mừng ${user.full_name} đến với Ngọc Châu Cinema`, 'success');
+      this.closeAuthModal();
+      this.renderAuthUI();
+    } catch (e) {
+      Utils.showToast(e.message || 'Đăng ký thất bại!', 'error');
+    }
+  },
+
+  handleLogout() {
+    this.isLoggedIn = false;
+    this.currentUser = null;
+    localStorage.removeItem('ngoc_chau_customer');
+    Utils.showToast('Đã đăng xuất tài khoản.', 'info');
+    this.renderAuthUI();
   },
 
   bindEvents() {
@@ -46,7 +175,7 @@ const App = {
       });
     }
 
-    // Close Modal Event
+    // Close Movie Detail Modal Event
     const modalCloseBtn = document.getElementById('movie-modal-close');
     const modalBackdrop = document.getElementById('movie-modal');
     if (modalCloseBtn && modalBackdrop) {
@@ -59,6 +188,45 @@ const App = {
         }
       });
     }
+
+    // Auth Modal Close Event
+    const authCloseBtn = document.getElementById('auth-modal-close');
+    const authBackdrop = document.getElementById('auth-modal');
+    if (authCloseBtn && authBackdrop) {
+      authCloseBtn.addEventListener('click', () => this.closeAuthModal());
+      authBackdrop.addEventListener('click', (e) => {
+        if (e.target === authBackdrop) this.closeAuthModal();
+      });
+    }
+
+    // Auth Forms Submit Handlers
+    document.getElementById('auth-login-form')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const loginInput = document.getElementById('auth-login-input').value.trim();
+      const pass = document.getElementById('auth-login-pass').value.trim();
+      if (loginInput) {
+        this.handleLogin(loginInput, pass);
+      }
+    });
+
+    document.getElementById('auth-register-form')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = document.getElementById('auth-reg-name').value.trim();
+      const phone = document.getElementById('auth-reg-phone').value.trim();
+      const email = document.getElementById('auth-reg-email').value.trim();
+      const pass = document.getElementById('auth-reg-pass').value.trim();
+      if (name && (phone || email)) {
+        this.handleRegister(name, phone, email, pass);
+      }
+    });
+
+    // Close dropdown on outside click
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.user-pill-container')) {
+        const menu = document.getElementById('user-dropdown-menu');
+        if (menu) menu.classList.remove('show');
+      }
+    });
   },
 
   renderMovies() {

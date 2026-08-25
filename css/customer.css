@@ -796,3 +796,86 @@
   .food-grid { grid-template-columns: 1fr; }
   .e-ticket-stub { grid-template-columns: 1fr; }
 }
+
+/* Auth Modal & User Dropdown Styles */
+.auth-tab-btn {
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  padding: 0.5rem 0.25rem 0.75rem;
+  cursor: pointer;
+  position: relative;
+  transition: var(--transition-fast);
+}
+
+.auth-tab-btn.active {
+  color: var(--primary-gold);
+  border-bottom: 3px solid var(--primary-gold);
+}
+
+.user-pill-container {
+  position: relative;
+  display: inline-block;
+}
+
+.user-pill-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color-gold);
+  color: var(--primary-gold);
+  padding: 0.4rem 0.85rem;
+  border-radius: var(--radius-full);
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.user-pill-btn:hover {
+  background-color: var(--primary-gold-light);
+  box-shadow: var(--shadow-gold);
+}
+
+.user-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color-gold);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-gold);
+  min-width: 200px;
+  z-index: 100;
+  display: none;
+  overflow: hidden;
+}
+
+.user-dropdown-menu.show {
+  display: block;
+}
+
+.user-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.75rem 1rem;
+  color: var(--text-primary);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  width: 100%;
+  background: none;
+  border: none;
+  text-align: left;
+}
+
+.user-dropdown-item:hover {
+  background-color: var(--bg-card);
+  color: var(--primary-gold);
+}
