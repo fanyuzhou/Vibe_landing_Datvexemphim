@@ -38,6 +38,20 @@ const App = {
 
   renderAuthUI() {
     const container = document.getElementById('auth-nav-container');
+    const adminNavLink = document.getElementById('nav-admin-link');
+
+    const isAdminOrManagement = this.isLoggedIn && this.currentUser && ['admin', 'staff', 'sponsor'].includes(this.currentUser.role);
+
+    // Hide "Quản Trị Viên" link on navbar for regular USER role or unauthenticated users
+    if (adminNavLink) {
+      if (isAdminOrManagement) {
+        adminNavLink.style.display = 'inline-block';
+        adminNavLink.href = 'admin.html';
+      } else {
+        adminNavLink.style.display = 'none';
+      }
+    }
+
     if (!container) return;
 
     if (this.isLoggedIn && this.currentUser) {
@@ -49,10 +63,13 @@ const App = {
           </button>
           <div class="user-dropdown-menu" id="user-dropdown-menu">
             <div style="padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color); font-size: 0.8rem; color: var(--text-muted);">
-              ${this.currentUser.email || this.currentUser.phone || 'Thành viên Ngọc Châu'}
+              <div>${this.currentUser.email || this.currentUser.phone || 'Thành viên Ngọc Châu'}</div>
+              <div style="font-size: 0.75rem; color: var(--primary-gold); margin-top: 0.2rem; font-weight: 700;">
+                Quyền hạn: ${(this.currentUser.role || 'USER').toUpperCase()}
+              </div>
             </div>
-            ${['admin', 'staff', 'sponsor'].includes(this.currentUser.role) ? `
-              <a href="admin.html" class="user-dropdown-item">⚙️ Trang Quản Trị</a>
+            ${isAdminOrManagement ? `
+              <a href="admin.html" class="user-dropdown-item" style="color: var(--primary-gold);">⚙️ Trang Quản Trị</a>
             ` : ''}
             <button type="button" class="user-dropdown-item" style="color: var(--accent-red);" onclick="App.handleLogout()">
               🚪 Đăng Xuất
