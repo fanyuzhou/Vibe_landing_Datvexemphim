@@ -33,6 +33,43 @@ const DB = {
     }
   },
 
+  async syncAllLocalToSupabase() {
+    if (!this.supabase || !this.db) return;
+    try {
+      // Sync users
+      const usersRes = this.db.exec(`SELECT * FROM users`);
+      if (usersRes.length && usersRes[0].values.length) {
+        const users = this.mapRows(usersRes[0]);
+        for (const u of users) {
+          await this.syncToSupabase('users', {
+            full_name: u.full_name,
+            email: u.email,
+            phone: u.phone || '',
+            password: u.password || '123456',
+            role: u.role || 'user',
+            status: u.status || 'active'
+          });
+        }
+      }
+
+      // Sync customers
+      const customersRes = this.db.exec(`SELECT * FROM customers`);
+      if (customersRes.length && customersRes[0].values.length) {
+        const customers = this.mapRows(customersRes[0]);
+        for (const c of customers) {
+          await this.syncToSupabase('customers', {
+            full_name: c.full_name,
+            email: c.email || '',
+            phone: c.phone || '',
+            password: c.password || '123456'
+          });
+        }
+      }
+    } catch (e) {
+      console.warn("Background sync to Supabase Cloud warning:", e);
+    }
+  },
+
   async init() {
     if (this.isInitialized) return this;
 
@@ -68,7 +105,12 @@ const DB = {
     }
 
     this.isInitialized = true;
-    console.log("Database initialized successfully!");
+    console.log("Database initialized successfully with Supabase Cloud!");
+
+    setTimeout(() => {
+      this.syncAllLocalToSupabase();
+    }, 1000);
+
     return this;
   },
 
@@ -770,33 +812,70 @@ const DB = {
 
   addUser(data) {
     if (this.db) {
+      const emailClean = data.email.trim().toLowerCase();
+      const passClean = data.password || '123456';
+      const roleClean = data.role || 'user';
+      const statusClean = data.status || 'active';
+
       this.db.run(
         `INSERT INTO users (full_name, email, phone, password, role, status) VALUES (?, ?, ?, ?, ?, ?)`,
         [
           data.full_name,
-          data.email.trim().toLowerCase(),
+          emailClean,
           data.phone || '',
-          data.password || '123456',
-          data.role || 'user',
-          data.status || 'active'
+          passClean,
+          roleClean,
+          statusClean
         ]
       );
+
+      // ⚡ Sync User to Supabase Cloud users table
+      this.syncToSupabase('users', {
+        full_name: data.full_name,
+        email: emailClean,
+        phone: data.phone || '',
+        password: passClean,
+        role: roleClean,
+        status: statusClean
+      });
+
       this.save();
     }
   },
 
   updateUser(id, data) {
     if (this.db) {
+      const emailClean = data.email.trim().toLowerCase();
+      const roleClean = data.role || 'user';
+      const statusClean = data.status || 'active';
+
       if (data.password && data.password.trim()) {
         this.db.run(
           `UPDATE users SET full_name = ?, email = ?, phone = ?, password = ?, role = ?, status = ? WHERE id = ?`,
-          [data.full_name, data.email.trim().toLowerCase(), data.phone || '', data.password.trim(), data.role, data.status || 'active', id]
+          [data.full_name, emailClean, data.phone || '', data.password.trim(), roleClean, statusClean, id]
         );
+
+        this.syncToSupabase('users', {
+          full_name: data.full_name,
+          email: emailClean,
+          phone: data.phone || '',
+          password: data.password.trim(),
+          role: roleClean,
+          status: statusClean
+        });
       } else {
         this.db.run(
           `UPDATE users SET full_name = ?, email = ?, phone = ?, role = ?, status = ? WHERE id = ?`,
-          [data.full_name, data.email.trim().toLowerCase(), data.phone || '', data.role, data.status || 'active', id]
+          [data.full_name, emailClean, data.phone || '', roleClean, statusClean, id]
         );
+
+        this.syncToSupabase('users', {
+          full_name: data.full_name,
+          email: emailClean,
+          phone: data.phone || '',
+          role: roleClean,
+          status: statusClean
+        });
       }
       this.save();
     }
@@ -805,6 +884,16 @@ const DB = {
   updateUserRole(id, newRole) {
     if (this.db) {
       this.db.run(`UPDATE users SET role = ? WHERE id = ?`, [newRole, id]);
+      const u = this.getUserById(id);
+      if (u) {
+        this.syncToSupabase('users', {
+          email: u.email,
+          full_name: u.full_name,
+          phone: u.phone || '',
+          role: newRole,
+          status: u.status || 'active'
+        });
+      }
       this.save();
     }
   },
@@ -1288,6 +1377,14 @@ const DB = {
     const custIdRes = this.db.exec(`SELECT last_insert_rowid() as id`);
     const custId = (custIdRes.length && custIdRes[0].values.length) ? custIdRes[0].values[0][0] : Date.now();
 
+    // ⚡ Sync Customer account to Supabase Cloud customers table
+    this.syncToSupabase('customers', {
+      full_name: name,
+      email: email || '',
+      phone: phone || '',
+      password: password
+    });
+
     if (email) {
       try {
         this.db.run(
@@ -1295,6 +1392,16 @@ const DB = {
           [name, email, phone, password]
         );
       } catch (e) {}
+
+      // ⚡ Sync User account to Supabase Cloud users table
+      this.syncToSupabase('users', {
+        full_name: name,
+        email: email,
+        phone: phone || '',
+        password: password,
+        role: 'user',
+        status: 'active'
+      });
     }
 
     this.save();
